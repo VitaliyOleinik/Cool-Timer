@@ -77,8 +77,21 @@ public class MainActivity extends AppCompatActivity {
                             PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     // checking for checkBox
                     if(sharedPreferences.getBoolean("enable_sound", true)){
-                        MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bell1);
-                        mediaPlayer.start();
+
+                        String melodyName = sharedPreferences.getString("timer_melody", "bell");
+                        if(melodyName.equals("bell")){
+                            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bell2);
+                            mediaPlayer.start();
+                        } else if(melodyName.equals("alarm")){
+                            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bell1);
+                            mediaPlayer.start();
+                        } else if(melodyName.equals("bip")){
+                            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bell3);
+                            mediaPlayer.start();
+                        }
+
+
+
                     }
                     resetTimer();
                 }
