@@ -4,10 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -70,8 +72,14 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onFinish() {
-                    MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bell1);
-                    mediaPlayer.start();
+
+                    SharedPreferences sharedPreferences =
+                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    // checking for checkBox
+                    if(sharedPreferences.getBoolean("enable_sound", true)){
+                        MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bell1);
+                        mediaPlayer.start();
+                    }
                     resetTimer();
                 }
             }; //.start(); // for start
