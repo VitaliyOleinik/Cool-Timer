@@ -2,15 +2,17 @@ package com.example.cooltimer;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.preference.CheckBoxPreference;
+import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
 public class SettingsFragment extends PreferenceFragmentCompat
-        implements SharedPreferences.OnSharedPreferenceChangeListener{
+        implements SharedPreferences.OnSharedPreferenceChangeListener, Preference.OnPreferenceChangeListener {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -28,6 +30,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 setPreferenceLabael(preference, value);
             }
         }
+
+        Preference preference = findPreference("default_interval");
+        preference.setOnPreferenceChangeListener(this);
     }
 
     private void setPreferenceLabael(Preference preference, String value){
@@ -37,6 +42,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
             if(index >= 0){
                 listPreference.setSummary(listPreference.getEntries()[index]);
             }
+        } else if (preference instanceof EditTextPreference){
+            preference.setSummary(value);
         }
     }
 
@@ -59,5 +66,22 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public void onDestroy() {
         super.onDestroy();
         getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        // working when the settings of pref are changed
+        // validation data
+        Toast toast = Toast.makeText(getContext(), "Please enter an integer number", Toast.LENGTH_SHORT);
+        if(preference.getKey().equals("default_interval")){
+            String defaultIntervalString = (String) newValue;
+            try{
+                int defaultInterval = Integer.parseInt(defaultIntervalString);
+            }catch (NumberFormatException e){
+                toast.show();
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -18,32 +18,39 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Objects;
+
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     private TextView textView;
     private Button button;
     private SeekBar seekBar;
     private boolean isTimerOn;
     private CountDownTimer countDownTimer;
+    private int defaultInterval;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         textView = findViewById(R.id.timerTextView);
         button = findViewById(R.id.startButton);
         seekBar = findViewById(R.id.seekBar);
 
-        seekBar.setMax(600);
-        seekBar.setProgress(30);
+        seekBar.setMax(3600);
+        setIntervalFromSharedPreferences(sharedPreferences);
         isTimerOn = false;
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                updateTimer((long) progress * 1000);
+                long progressInMillis = progress * 1000;
+                updateTimer(progressInMillis);
             }
 
             @Override
@@ -56,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     public void start(View view) {
@@ -125,11 +134,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void resetTimer() {
         countDownTimer.cancel();
-        textView.setText("00:30");
         button.setText("Start!");
         seekBar.setEnabled(true);
-        seekBar.setProgress(30);
         isTimerOn = false;
+        setIntervalFromSharedPreferences(sharedPreferences);
     }
 
     @Override
@@ -158,5 +166,23 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    private void setIntervalFromSharedPreferences(SharedPreferences sharedPreferences){
+        defaultInterval = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString("default_interval", "30")));
+        long defaultIntervalInMillis = defaultInterval * 1000;
+        updateTimer(defaultIntervalInMillis);
+        seekBar.setProgress(defaultInterval);
+    }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        if(s.equals("default_interval")){
+            setIntervalFromSharedPreferences(sharedPreferences);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+    }
 }
